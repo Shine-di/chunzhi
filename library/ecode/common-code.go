@@ -1,0 +1,25 @@
+package ecode
+
+// All common code
+var (
+	OK                 = add(0)
+	Canceled           = add(1)
+	Unknown            = add(2)
+	InvalidArgument    = add(3)
+	DeadlineExceeded   = add(4)
+	NotFound           = add(5)
+	AlreadyExists      = add(6)
+	PermissionDenied   = add(7)
+	ResourceExhausted  = add(8)
+	FailedPrecondition = add(9)
+	Aborted            = add(10)
+	OutOfRange         = add(11)
+	Unimplemented      = add(12)
+	Internal           = add(13)
+	Unavailable        = add(14)
+	DataLoss           = add(15)
+	Unauthenticated    = add(16)
+	IdIsEmpty          = add(17)
+	ConnectDbFail      = add(18)
+	DbTimeout          = add(19)
+)
