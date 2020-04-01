@@ -4,3 +4,10 @@
  */
 
 package CSGO
+
+import "game-test/library/log"
+
+func init() {
+
+	log.Warn("do init ")
+}
