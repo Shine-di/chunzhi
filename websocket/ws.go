@@ -6,7 +6,9 @@
 package websocket
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"game-test/library/log"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -35,12 +37,36 @@ var Bindder = &Binder{
 }
 
 var upGrader = websocket.Upgrader{
+	//跨域
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
 }
 
+//爬虫部分
+var (
+	//分页参数
+	pageLimit = 50
+
+	//代理
+	requestCount = 0
+	proxyList    = []string{
+		"",
+		"http://47.91.246.62:59073",
+		"http://47.56.193.197:59073",
+	}
+
+	httpHeader = http.Header{
+		"User-Agent": []string{"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"},
+	}
+)
+
 func NewConnect(c *gin.Context) {
+	id := c.GetHeader("tenant_id")
+	if id == "" {
+		log.Error("参数错误")
+		return
+	}
 	clientId := "sdfsdfsd"
 	con, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -107,4 +133,74 @@ func SendWsMsg(clientId, message string) error {
 	}
 	log.Info("发送ws成功")
 	return nil
+}
+
+func Ray57() {
+	log.Info(fmt.Sprintf("%s开始连接websocket", "ray57"))
+
+	u := "wss://cfsocket.raybet.ai/socketcluster/"
+	conn, _, err := websocket.DefaultDialer.Dial(u, httpHeader)
+	if err != nil {
+		log.Error("Ray57 websocket Dial err ", zap.Error(err))
+		return
+	}
+
+	//发订阅消息
+	err = conn.WriteMessage(websocket.TextMessage, []byte(`{"event":"#handshake","data":{"authToken":null},"cid":1}`))
+	if err != nil {
+		log.Error("Ray57 websocket handshake err ", zap.Error(err))
+		return
+	}
+
+	err = conn.WriteMessage(websocket.TextMessage, []byte(`{"event":"#subscribe","data":{"channel":"match"},"cid":2}`))
+	if err != nil {
+		log.Error("Ray57 websocket handshake err ", zap.Error(err))
+		return
+	}
+
+	//处理接收
+	for {
+		select {
+		default:
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+				log.Error("Ray57 websocket ReadMessage err ", zap.Error(err))
+				return
+			}
+
+			recv := string(message)
+
+			//处理心跳消息
+			if recv == "#1" {
+				_ = conn.WriteMessage(websocket.TextMessage, []byte(`#2`))
+				continue
+			}
+			result := new(Ray57WS)
+			err = json.Unmarshal(message, result)
+			if err != nil {
+				log.Error(err.Error())
+				continue
+			}
+			//log.Info(fmt.Sprintf("%s 收到websocket消息:%s", "ray57", recv))
+			log.Info("json", zap.Any("json", result))
+		}
+	}
+
+}
+
+type Ray57WS struct {
+	Event string `json:"event"`
+	Data  struct {
+		Channel string `json:"channel"`
+		Data    struct {
+			Source string `json:"source"`
+			Rates  []struct {
+				Id         int32  `json:"id"`
+				MatchId    int64  `json:"match_id"`
+				Rate       string `json:"odds"`
+				LastUpdate string `json:"last_update"`
+				Status     int64  `json:"status"`
+			} `json:"odds"`
+		} `json:"data"`
+	} `json:"data"`
 }

@@ -13,15 +13,15 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
 	"game-test/CSGO"
 	"game-test/constant"
 	jwtN "game-test/jwt"
-	"game-test/router"
+	"game-test/library/log"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -31,14 +31,17 @@ import (
 
 func main() {
 
-	//CSGO.Ray57()
 	//GetToken()
 	//TestVerifySign()
-	engine := gin.Default()
+	//engine := gin.Default()
 	go CSGO.WS()
-	router.LoadRouter(engine)
-	engine.Run(":50051")
-
+	//go CSGO.WS1()
+	//go websocket.Ray57()
+	//router.LoadRouter(engine)
+	//engine.Run(":50052")
+	//toTest()
+	select {}
+	//ToString()
 }
 
 func GetToken() {
@@ -60,8 +63,8 @@ func GetToken() {
 }
 
 func TestVerifySign() {
-	sign, errSign := Sign("request_time=1585008386632&tenant_id=7", constant.Private_key7)
-	errVerify := VerifySign("request_time=1585008386632&tenant_id=7", sign, constant.Public_key7)
+	sign, errSign := Sign("game_id=1&limit=3000&offset=0&request_time=12123123&status=1&tenant_id=19", constant.Private_key19)
+	errVerify := VerifySign("game_id=1&limit=3000&offset=0&request_time=12123123&status=1&tenant_id=19", sign, constant.Public_key19)
 
 	fmt.Println(sign)
 	fmt.Println(errSign)
@@ -164,4 +167,68 @@ func token() {
 	fmt.Println(tokenState)
 	fmt.Println(claims)
 
+}
+
+func toTest() {
+	now := time.Now()
+	after := now.Add(time.Second * 30)
+	nowS, _ := now.MarshalJSON()
+	afterS, _ := after.MarshalJSON()
+	log.Info(string(nowS))
+	log.Info(string(afterS))
+	if after.After(now.Add(time.Second * 31)) {
+		log.Info("过期")
+	} else {
+		log.Info("没有过期")
+	}
+}
+
+func ToString() {
+	liveRate1 := new(LiveRate)
+	liveRate1.Payload.Data.GroupId = 1232312312
+	liveRate1.Payload.Data.ItemId = 234234234
+	liveRate1.Payload.Data.SeriesId = 21123123
+
+	b, _ := json.Marshal(liveRate1)
+	s := string(b)
+	log.Info(s)
+	ss, _ := json.Marshal(s)
+	log.Info(string(ss))
+
+	_, err := toPushData(s, nil)
+	if err != nil {
+		log.Info(err.Error())
+	}
+
+}
+
+func toPushData(from string, resultto interface{}) (*LiveRate, error) {
+	result := new(LiveRate)
+	//ttttttt, err := json.Marshal(from)
+	//if err != nil {
+	//	return nil, err
+	//}
+	err := json.Unmarshal([]byte(from), result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+type LiveRate struct {
+	Channel string `json:"channel"`
+	Payload struct {
+		Source   string `json:"source"`
+		PushTime int64  `json:"push_time"`
+		Data     struct {
+			GroupId    int64  `json:"group_id"`
+			ItemId     int64  `json:"item_id"`
+			SeriesId   int64  `json:"seriesId"`
+			Status     int32  `json:"status"`
+			Stage      int32  `json:"stage"`
+			Rate       string `json:"rate"`
+			From       int32  `json:"from"`
+			UpdateTime int64  `json:"update_time"`
+		} `json:"data"`
+	} `json:"payload"`
 }

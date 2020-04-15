@@ -14,6 +14,5 @@ func LoadRouter(engine *gin.Engine) {
 	//权限校验
 	//bAuth := engine.Group("/api/v1/", auth.AuthMiddleware())
 	bAuth := engine.Group("/api/v1/")
-	bAuth.GET("ws", websocket.NewConnect) //游戏列表
-	//盘口结算推送  赔率推送
+	bAuth.GET("ws/", websocket.NewConnect)
 }
