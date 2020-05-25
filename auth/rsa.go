@@ -146,9 +146,12 @@ func GetRsaKey(bits int, tenantId string) error {
 		return err
 	}
 	defer file.Close()
-	derStream := x509.MarshalPKCS1PrivateKey(privateKey)
+	derStream, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	if err != nil {
+		return err
+	}
 	private := &pem.Block{
-		Type:  "RSA PRIVATE KEY",
+		Type:  "PRIVATE KEY",
 		Bytes: derStream,
 	}
 	privateB := pem.EncodeToMemory(private)
