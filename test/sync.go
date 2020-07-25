@@ -3,7 +3,7 @@
  * @date: 2020/4/17 8:47 下午
  */
 
-package service
+package test
 
 import (
 	"bytes"
@@ -39,7 +39,6 @@ type BaseData struct {
 	Description string `json:"description"`   //描述
 	Source      uint   `json:"source"`        //来源平台
 }
-
 
 func Sync() {
 	req := &data_game_proto.RequestGameEquipmentList{

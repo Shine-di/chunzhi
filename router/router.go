@@ -15,4 +15,5 @@ func LoadRouter(engine *gin.Engine) {
 	//bAuth := engine.Group("/api/v1/", auth.AuthMiddleware())
 	bAuth := engine.Group("/api/v1/")
 	bAuth.GET("ws/", websocket.NewConnect)
+	bAuth.GET("ws/:id", websocket.NewConnect)
 }

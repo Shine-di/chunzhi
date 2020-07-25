@@ -61,7 +61,15 @@ var (
 	}
 )
 
+type param struct {
+	Id int64 `json:"id" form:"id"`
+}
+
 func NewConnect(c *gin.Context) {
+	idN := c.Param("id")
+
+	log.Info(idN)
+
 	id := c.GetHeader("tenant_id")
 	if id == "" {
 		log.Error("参数错误")
@@ -115,7 +123,7 @@ func ProcessWsMsg(wsc WebSocketCon, clientId string) {
 			}
 		default:
 			log.Info("ws收到新消息")
-			log.Info("", zap.Any("data", data))
+			log.Info("", zap.Any("data", string(data)))
 		}
 	}
 }

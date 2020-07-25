@@ -48,14 +48,14 @@ func main() {
 }
 
 func DoVerifySign(param, privateKey, publicKey string) {
-	param, privateKey = SortParam(param, privateKey)
-	sign, errSign := Sign(param, privateKey)
-	errVerify := VerifySign(param, sign, publicKey)
+	s, privateKey := SortParam(param, privateKey)
+	sign, errSign := Sign(s, privateKey)
+	errVerify := VerifySign(s, sign, publicKey)
 	fmt.Println(sign)
 	fmt.Println(errSign)
 	fmt.Println(errVerify)
 	fmt.Println("----------------------")
-	fmt.Println(param)
+	fmt.Println(s)
 }
 
 func SortParam(param, privateKey string) (string, string) {
@@ -74,6 +74,27 @@ func SortParam(param, privateKey string) (string, string) {
 		privateKey = Private_keyd
 	} else {
 		params = strings.Split(param, "&")
+	}
+	result := make([]string, 0)
+	for _, param := range params {
+		if strings.HasPrefix(param, "time_stamp") {
+			//t := time.Now().Unix()
+			//s := strconv.Itoa(int(t))
+			//result = append(result, "time_stamp="+s)
+			result = append(result, param)
+		} else {
+			result = append(result, param)
+		}
+	}
+	sort.Strings(result)
+	return strings.Join(result, "&"), privateKey
+}
+
+func SortParamMap(param map[string]string, privateKey string) (string, string) {
+	var params []string
+	for k, v := range param {
+		item := k + "=" + v
+		params = append(params, item)
 	}
 	sort.Strings(params)
 	return strings.Join(params, "&"), privateKey
@@ -133,6 +154,60 @@ func MD5Hex(val string) string {
 	return hex.EncodeToString(md5Obj.Sum(nil))
 }
 
+////签名
+//func Sign(name, privateKey string) (string, error) {
+//	name = MD5Hex(name)
+//	keyByte, _ := pem.Decode([]byte(privateKey))
+//	if keyByte == nil {
+//		return "", errors.New("private key error")
+//	}
+//	key, errKey := x509.ParsePKCS8PrivateKey(keyByte.Bytes)
+//	if errKey != nil {
+//		return "", errKey
+//	}
+//	h := crypto.SHA256.New()
+//	h.Write([]byte(name))
+//	hash := h.Sum(nil)
+//
+//	signature, errSign := rsa.SignPKCS1v15(rand.Reader, key.(*rsa.PrivateKey), crypto.SHA256, hash)
+//	if errSign != nil {
+//		return "", errSign
+//	}
+//	return base64.StdEncoding.EncodeToString(signature), nil
+//}
+//
+//// 校验签名
+//func VerifySign(val, sign, publicKey string) error {
+//	signHex := MD5Hex(val)
+//
+//	keyByte, _ := pem.Decode([]byte(publicKey))
+//	if keyByte == nil {
+//		return errors.New("public key error")
+//	}
+//
+//	key, errKey := x509.ParsePKIXPublicKey(keyByte.Bytes)
+//	if errKey != nil {
+//		return errKey
+//	}
+//
+//	h := crypto.SHA256.New()
+//	h.Write([]byte(signHex))
+//	hash := h.Sum(nil)
+//
+//	signDecode, errDecode := base64.StdEncoding.DecodeString(sign)
+//	if errDecode != nil {
+//		return errDecode
+//	}
+//
+//	return rsa.VerifyPKCS1v15(key.(*rsa.PublicKey), crypto.SHA256, hash, signDecode)
+//}
+//
+//func MD5Hex(val string) string {
+//	md5Obj := md5.New()
+//	md5Obj.Write([]byte(val[:]))
+//	return hex.EncodeToString(md5Obj.Sum(nil))
+//}
+
 //RSA公钥私钥产生
 func GetRsaKey(bits int, tenantId string) error {
 	// 生成私钥文件
@@ -146,10 +221,7 @@ func GetRsaKey(bits int, tenantId string) error {
 		return err
 	}
 	defer file.Close()
-	derStream, err := x509.MarshalPKCS8PrivateKey(privateKey)
-	if err != nil {
-		return err
-	}
+	derStream := x509.MarshalPKCS1PrivateKey(privateKey)
 	private := &pem.Block{
 		Type:  "PRIVATE KEY",
 		Bytes: derStream,

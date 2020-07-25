@@ -8,5 +8,5 @@ package auth
 import "testing"
 
 func TestGenRsaKey(t *testing.T) {
-	GetRsaKey(2048, "55")
+	GetRsaKey(2048, "996")
 }

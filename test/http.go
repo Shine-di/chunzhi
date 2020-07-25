@@ -3,7 +3,7 @@
  * @date: 2020/4/17 8:45 下午
  */
 
-package app
+package test
 
 import (
 	"encoding/json"
@@ -43,5 +43,5 @@ func Routers() {
 		glog.Info("成功")
 		context.JSON(http.StatusOK, "success")
 	})
-	engine.Run(":50052")
+	engine.Run(":50051")
 }
