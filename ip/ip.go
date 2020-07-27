@@ -21,7 +21,7 @@ import (
 func GetExternalIp() string {
 	client := http.Client{}
 
-	resp, err := client.Get("http://myexternalip.com/raw")
+	resp, err := client.Get("sHttp://myexternalip.com/raw")
 	if err != nil {
 		os.Stderr.WriteString(err.Error())
 		os.Stderr.WriteString("\n")
@@ -84,9 +84,9 @@ func (p ProxyAuth) ProxyClient() http.Client {
 
 	var proxyURL *url.URL
 	if p.Username != "" && p.Password != "" {
-		proxyURL, _ = url.Parse("http://" + p.Username + ":" + p.Password + "@" + ProxyServer)
+		proxyURL, _ = url.Parse("sHttp://" + p.Username + ":" + p.Password + "@" + ProxyServer)
 	} else {
-		proxyURL, _ = url.Parse("http://" + ProxyServer)
+		proxyURL, _ = url.Parse("sHttp://" + ProxyServer)
 	}
 	return http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}
 }
@@ -95,7 +95,7 @@ func main() {
 
 	targetURI := "https://httpbin.org/ip"
 
-	// 初始化 proxy http client
+	// 初始化 proxy sHttp client
 	client := ProxyAuth{"username", "password"}.ProxyClient()
 
 	request, _ := http.NewRequest("GET", targetURI, bytes.NewBuffer([]byte(``)))

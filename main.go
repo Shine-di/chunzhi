@@ -11,44 +11,84 @@ import (
 	"game-test/auth"
 	"game-test/constant"
 	"game-test/library/log"
+	"game-test/sHttp"
+	"game-test/websocket"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 )
 
-type mongodb string
-
-type mongoCollection string
-
-func (e mongodb) p() string {
-	return string(e)
-}
-
 const (
-	s mongodb = "ssssss"
+	wsURLRelease   = "ws://47.57.152.73:30023/api/v1/ws/"
+	wsURLReleaseV2 = "wss://stream.dawnbyte.com/ws"
+	wsURLDevV2     = "ws://47.114.175.98:1325/ws"
 )
 
-type test struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-func Marshal(data interface{}) string {
-	by, err := json.Marshal(data)
-	if err != nil {
-		log.Error(err.Error())
-		return ""
+var (
+	proxy = []string{
+		"http://8.210.97.229:59073",
+		"http://8.210.99.228:59073",
+		"http://8.210.96.64:59073",
+		"http://8.210.97.107:59073",
+		"http://8.210.96.103:59073",
+		"http://8.210.71.229:59073",
+		"http://8.210.99.203:59073",
 	}
-	return string(by)
-}
+)
+
 func main() {
 
-	auth.DoVerifySign("begin_id=&begin_time=0&game_id=1&limit=50&time_stamp=1595659882", constant.Private_key_v2_release, constant.Public_key_v2_release)
-	//CSGO.WS()
-	select {}
+	//auth.DoVerifySign("limit=100&offset=0&request_time=1595829023&tenant_id=6", constant.Private_key_v2_release, constant.Public_key_v2_release)
+	//httpGetDo()
+	//websocketDo()
+	httpGetWitchSignDo()
+	//select {}
 }
 
+func websocketDo() {
+	ws := &websocket.WS{
+		URL:      wsURLReleaseV2,
+		Stop:     make(chan bool, 0),
+		Message:  make(chan string, 0),
+		Duration: time.Second * 30,
+		Header:   http.Header{},
+		Proxy:    proxy[1],
+	}
+	ws.Start()
+}
+
+func httpGetDo() {
+	url := "47.114.175.98:8080/api/push/timeLine?begin_time=159564379&limit=1000&time_stamp=1595845290"
+	get := &sHttp.GET{
+		URL:    url,
+		Header: map[string]string{},
+		Proxy:  proxy[1],
+	}
+	get.Do()
+}
+
+func httpGetWitchSignDo() {
+	u := "https://openapi.dawnbyte.com/api/league"
+
+	s, privateKey := auth.SortParamMap(map[string]string{
+		"game_id": "3",
+		"limit":   "50",
+	}, constant.Private_key_v2_release)
+	sign, errSign := auth.Sign(s, privateKey)
+	if errSign != nil {
+		log.Error(errSign.Error())
+		return
+	}
+	get := &sHttp.GET{
+		URL: u + "?" + s,
+		Header: map[string]string{
+			"Sign": sign,
+		},
+		Proxy: proxy[1],
+	}
+	get.Do()
+}
 func TestChan() {
 	ch1 := make(chan string)
 

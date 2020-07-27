@@ -122,7 +122,7 @@ func getTeamAll(gameId int64) bool {
 	for {
 		str := "game_id=" + fmt.Sprintf("%v", gameId) + "&limit=100&offset=" + fmt.Sprintf("%v", offset)
 
-		url := "http://api.dawnbyte.com/api/v1/game/teams?" + sortStr(str)
+		url := "sHttp://api.dawnbyte.com/api/v1/game/teams?" + sortStr(str)
 
 		req, _ := http.NewRequest("GET", url, nil)
 

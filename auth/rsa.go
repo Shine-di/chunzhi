@@ -18,7 +18,9 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -78,10 +80,10 @@ func SortParam(param, privateKey string) (string, string) {
 	result := make([]string, 0)
 	for _, param := range params {
 		if strings.HasPrefix(param, "time_stamp") {
-			//t := time.Now().Unix()
-			//s := strconv.Itoa(int(t))
-			//result = append(result, "time_stamp="+s)
-			result = append(result, param)
+			t := time.Now().Unix()
+			s := strconv.Itoa(int(t))
+			result = append(result, "time_stamp="+s)
+			//result = append(result, param)
 		} else {
 			result = append(result, param)
 		}
@@ -96,6 +98,9 @@ func SortParamMap(param map[string]string, privateKey string) (string, string) {
 		item := k + "=" + v
 		params = append(params, item)
 	}
+	t := time.Now().Unix()
+	s := strconv.Itoa(int(t))
+	params = append(params, "time_stamp="+s)
 	sort.Strings(params)
 	return strings.Join(params, "&"), privateKey
 }

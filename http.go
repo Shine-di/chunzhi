@@ -97,8 +97,8 @@ package main
 //
 //func Post(url string, body interface{}) (error, []byte) {
 //	bodyByte, _ := json.Marshal(body)
-//	client := http.Client{}
-//	req, _ := http.NewRequest("POST", url, bytes.NewReader(bodyByte))
+//	client := sHttp.Client{}
+//	req, _ := sHttp.NewRequest("POST", url, bytes.NewReader(bodyByte))
 //	req.Header.Add("Content-Type", "application/json")
 //	req.Header.Add("project", "space")
 //	resp, err := client.Do(req)

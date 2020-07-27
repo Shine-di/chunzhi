@@ -25,8 +25,8 @@ var (
 	requestCount = 0
 	proxyList    = []string{
 		"",
-		"http://47.91.246.62:59073",
-		"http://47.56.193.197:59073",
+		"sHttp://47.91.246.62:59073",
+		"sHttp://47.56.193.197:59073",
 	}
 
 	httpHeader = http.Header{
@@ -47,6 +47,7 @@ const (
 	//wsURLRelease = "ws://47.89.37.38:30023/api/v1/ws/" //15.30
 	wsURLRelease   = "ws://47.57.152.73:30023/api/v1/ws/"             //15.30
 	wsURLReleaseV2 = "wss://stream.dawnbyte.com/ws"                   //15.30
+	wsURLDevV2     = "ws://47.114.175.98:1325/ws"                     //15.30
 	pdev           = "ws://47.114.175.98:8082/ws"                     //15.30
 	wsURL1         = "wss://api.gamescorekeeper.com/v1/liveapi/63158" //19.00
 	wsURL2         = "wss://api.gamescorekeeper.com/v1/liveapi/63170" //20.00

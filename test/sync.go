@@ -64,7 +64,7 @@ func Sync() {
 		equi.Description = e.Description
 		i++
 		fmt.Sprintln(fmt.Printf("num ------ %v-------", i))
-		err, _ := Post("http://127.0.0.1:50052/api", *equi)
+		err, _ := Post("sHttp://127.0.0.1:50052/api", *equi)
 		if err != nil {
 			fmt.Println("-----------------调用失败")
 			log.Error(err.Error())
