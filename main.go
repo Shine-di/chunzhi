@@ -52,7 +52,6 @@ func main() {
 	//httpGetDo()
 	//websocketDo()
 	httpGetWitchSignDo()
-	//select {}
 	//toTest()
 }
 
