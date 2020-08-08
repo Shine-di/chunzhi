@@ -107,6 +107,7 @@ func SortParamMap(param map[string]string, privateKey string) (string, string) {
 
 //签名
 func Sign(name, privateKey string) (string, error) {
+
 	name = MD5Hex(name)
 	keyByte, _ := pem.Decode([]byte(privateKey))
 	if keyByte == nil {
@@ -129,6 +130,7 @@ func Sign(name, privateKey string) (string, error) {
 
 // 校验签名
 func VerifySign(val, sign, publicKey string) error {
+	val, _ = SortParam(val, "")
 	signHex := MD5Hex(val)
 
 	keyByte, _ := pem.Decode([]byte(publicKey))

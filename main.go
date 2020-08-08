@@ -6,13 +6,14 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"game-test/auth"
 	"game-test/constant"
 	"game-test/library/log"
 	"game-test/sHttp"
 	"game-test/websocket"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -39,21 +40,30 @@ var (
 
 func main() {
 
-	//auth.DoVerifySign("limit=100&offset=0&request_time=1595829023&tenant_id=6", constant.Private_key_v2_release, constant.Public_key_v2_release)
+	//auth.DoVerifySign("begin_id=0&begin_time=0&game_id=1&limit=-100&time_stamp=1596166122", constant.Private_key_v2_release, constant.Public_key_v2_release)
+	//err := auth.VerifySign("game_id=2&begin_id=0&limit=1&time_stamp=1596703642", "THL3qq4mNwxlhk6b0f3fPXqiZhwiiTHI5Ce/kfADkfvj8o3qthVcf1wX3RbW5wqRnqTMTSC70iY7wK7ClH1ukHSzQC3ZLk5+LHH+7kUfUX9WgwgGDOqJny4GLRhRWHffR6TMvOR5NgopHYdePRqceK99OAX1j8TLDwJhvPJHqg2Oyjw8NF+gaIxR66W6hz74Fc248MhznlYhcbVWZFEWk8/IY+7rf0QQDnNGiTRsi59P6gJhIAeJ/Kc/T26BoBnXcxU7Hua9+FwEZj1eT4v68BVDv9/pi+gtBh6u3yS567Um3qXEgVNCJfG/zZCdZ8k2mJxmpD4pMOjh7W4Bpw+QlKpH2Z0gYP3OuIwtx+0C9F2SLeOvu08Z0POztfvjwF9aeGZAUxImHi3Z/Z171i+w7uXFDATXy4A0jkTZ7xgQlmpS6awXiDffTOujdCxlX4JYhzH43nkvRnaN3s3VoQOaSQ1fL/wbnG9qPTL4C4S9vcenFh9gQUQg1sUSyXlbUL4jA542wndy34fZWeQ8kSVzbCUae3f4CioSAeWl070IUyIjb/RFEyaSLarRTRhOD5ZzNqaX4KC9MmdkQCacd+cCdegfS+n018fUh2ICCtAylmSY3eVoNcRNHbzNSyYcNHNJYTCYPPe4KRZiC91mf8Fa3K/bNT2+j8Dsj+JGcAPjJs0=", sss)
+	//if err != nil {
+	//	fmt.Println("sssss1111")
+	//	fmt.Println(err)
+	//} else {
+	//
+	//	fmt.Println("sssss")
+	//}
 	//httpGetDo()
 	//websocketDo()
 	httpGetWitchSignDo()
 	//select {}
+	//toTest()
 }
 
 func websocketDo() {
 	ws := &websocket.WS{
-		URL:      wsURLReleaseV2,
+		URL:      wsURLDevV2,
 		Stop:     make(chan bool, 0),
 		Message:  make(chan string, 0),
-		Duration: time.Second * 30,
+		Duration: time.Second * 10,
 		Header:   http.Header{},
-		Proxy:    proxy[1],
+		Proxy:    proxy[2],
 	}
 	ws.Start()
 }
@@ -63,17 +73,26 @@ func httpGetDo() {
 	get := &sHttp.GET{
 		URL:    url,
 		Header: map[string]string{},
-		Proxy:  proxy[1],
+		Proxy:  proxy[2],
 	}
 	get.Do()
 }
 
 func httpGetWitchSignDo() {
-	u := "https://openapi.dawnbyte.com/api/league"
+	//uLeague := "https://openapi.dawnbyte.com/api/league"
+	uSeries := "https://openapi.dawnbyte.com/api/series"
 
 	s, privateKey := auth.SortParamMap(map[string]string{
-		"game_id": "3",
-		"limit":   "50",
+		"game_id":           "1",
+		"begin_time":        "0",
+		"begin_id":          "966",
+		"has_inplay":        "0",
+		"has_odds":          "0",
+		"league_id":         "0",
+		"limit":             "50",
+		"start_time_after":  "0",
+		"start_time_before": "0",
+		"status":            "0",
 	}, constant.Private_key_v2_release)
 	sign, errSign := auth.Sign(s, privateKey)
 	if errSign != nil {
@@ -81,31 +100,27 @@ func httpGetWitchSignDo() {
 		return
 	}
 	get := &sHttp.GET{
-		URL: u + "?" + s,
+		URL: uSeries + "?" + s,
 		Header: map[string]string{
 			"Sign": sign,
 		},
-		Proxy: proxy[1],
+		//Proxy: proxy[1],
 	}
 	get.Do()
 }
-func TestChan() {
-	ch1 := make(chan string)
 
-	// 激活一个goroutine，但5秒之后才发送数据
-	go func() {
-		time.Sleep(3 * time.Second)
-		ch1 <- "put value into ch1"
-	}()
+func sGin() {
 
-	select {
-	case val := <-ch1:
-		fmt.Println("recv value from ch1:", val)
-		return
-	// 只等待3秒，然后就结束
-	case <-time.After(3 * time.Second):
-		fmt.Println("3 second over, timeover")
-	}
+	engine := gin.Default()
+	midCors := cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "DELETE", "*"},
+		AllowHeaders:     []string{"Origin", "*", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length", "*"},
+		AllowCredentials: true,
+	})
+	engine.Use(midCors)
+
 }
 
 func GetToken() {
@@ -124,70 +139,6 @@ func GetToken() {
 
 	fmt.Println(res)
 	fmt.Println(string(body))
-}
-
-func toTest() {
-	now := time.Now()
-	after := now.Add(time.Second * 30)
-	nowS, _ := now.MarshalJSON()
-	afterS, _ := after.MarshalJSON()
-	log.Info(string(nowS))
-	log.Info(string(afterS))
-	if after.After(now.Add(time.Second * 31)) {
-		log.Info("过期")
-	} else {
-		log.Info("没有过期")
-	}
-}
-
-func ToString() {
-	liveRate1 := new(LiveRate)
-	liveRate1.Payload.Data.GroupId = 1232312312
-	liveRate1.Payload.Data.ItemId = 234234234
-	liveRate1.Payload.Data.SeriesId = 21123123
-
-	b, _ := json.Marshal(liveRate1)
-	s := string(b)
-	log.Info(s)
-	ss, _ := json.Marshal(s)
-	log.Info(string(ss))
-
-	_, err := toPushData(s, nil)
-	if err != nil {
-		log.Info(err.Error())
-	}
-
-}
-
-func toPushData(from string, resultto interface{}) (*LiveRate, error) {
-	result := new(LiveRate)
-	//ttttttt, err := json.Marshal(from)
-	//if err != nil {
-	//	return nil, err
-	//}
-	err := json.Unmarshal([]byte(from), result)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-type LiveRate struct {
-	Channel string `json:"channel"`
-	Payload struct {
-		Source   string `json:"source"`
-		PushTime int64  `json:"push_time"`
-		Data     struct {
-			GroupId    int64  `json:"group_id"`
-			ItemId     int64  `json:"item_id"`
-			SeriesId   int64  `json:"seriesId"`
-			Status     int32  `json:"status"`
-			Stage      int32  `json:"stage"`
-			Rate       string `json:"rate"`
-			From       int32  `json:"from"`
-			UpdateTime int64  `json:"update_time"`
-		} `json:"data"`
-	} `json:"payload"`
 }
 
 var key = `-----BEGIN PRIVATE KEY-----

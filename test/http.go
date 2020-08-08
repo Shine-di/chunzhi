@@ -3,7 +3,7 @@
  * @date: 2020/4/17 8:45 下午
  */
 
-package test
+package auth
 
 import (
 	"encoding/json"

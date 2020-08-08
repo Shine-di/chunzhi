@@ -23,9 +23,8 @@ func (r *GET) Do() {
 	client := new(http.Client)
 	if r.Proxy != "" {
 		u, _ := url.Parse(r.Proxy)
-		proxy := http.ProxyURL(u)
 		client.Transport = &http.Transport{
-			Proxy: proxy,
+			Proxy: http.ProxyURL(u),
 		}
 		log.Info("==使用代理==")
 		fmt.Println(r.Proxy)

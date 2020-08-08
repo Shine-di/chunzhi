@@ -3,7 +3,7 @@
  * @date: 2020/5/9 9:39 上午
  */
 
-package test
+package auth
 
 import (
 	"errors"

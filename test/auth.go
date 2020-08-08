@@ -3,7 +3,7 @@
  * @date: 2020/6/4 5:31 下午
  */
 
-package main
+package auth
 
 import (
 	"crypto/rsa"
